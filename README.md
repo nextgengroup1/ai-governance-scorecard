@@ -1,51 +1,696 @@
-# AI Governance Scorecard — Enterprise Edition
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Modernization Readiness Scorecard — Enterprise</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-**Your AI deployments are being audited. Are you prepared?**
+  :root {
+    --ink: #0f0f0f;
+    --slate: #1c2333;
+    --mid: #4a5568;
+    --muted: #8a97a8;
+    --rule: #e2e6ea;
+    --bg: #f8f9fb;
+    --white: #ffffff;
+    --gold: #b8860b;
+    --gold-light: #f0c040;
+    --gold-bg: #fdf8ee;
+    --accent: #1a3a5c;
+    --accent-light: #e8f0f8;
+    --danger: #c0392b;
+  }
 
-Map your entire AI portfolio against 4 regulatory frameworks — before 
-an external auditor does it for you.
+  html { scroll-behavior: smooth; }
 
----
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--white);
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
 
-## 📐 Frameworks Covered
+  /* ─── NAV ─── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rule);
+    padding: 0 5%;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px;
+  }
+  .nav-brand {
+    font-family: 'Fraunces', serif;
+    font-weight: 700; font-size: 1rem;
+    color: var(--accent); letter-spacing: -0.01em;
+  }
+  .nav-cta {
+    background: var(--gold);
+    color: var(--white);
+    font-size: 0.8rem; font-weight: 600;
+    padding: 8px 18px; border-radius: 4px;
+    text-decoration: none; letter-spacing: 0.02em;
+    transition: background 0.2s;
+  }
+  .nav-cta:hover { background: #9a7209; }
 
-| Framework | Focus |
-|---|---|
-| NIST AI RMF | Risk Management |
-| ISO/IEC 42001 | AI Management Systems |
-| OWASP LLM Top 10 | Security Vulnerabilities |
-| EU AI Act | Regulatory Compliance |
+  /* ─── HERO ─── */
+  .hero {
+    background: var(--slate);
+    color: var(--white);
+    padding: 90px 5% 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 80% 50%, rgba(184,134,11,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner {
+    max-width: 900px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr auto;
+    gap: 60px; align-items: center;
+  }
+  .hero-eyebrow {
+    font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--gold-light); margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2rem, 4.5vw, 3.2rem);
+    font-weight: 900; line-height: 1.1;
+    letter-spacing: -0.02em; margin-bottom: 22px;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--gold-light);
+  }
+  .hero-sub {
+    font-size: 1.1rem; color: rgba(255,255,255,0.75);
+    line-height: 1.65; max-width: 560px; margin-bottom: 36px;
+  }
+  .hero-actions { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--gold);
+    color: var(--white);
+    font-size: 1rem; font-weight: 600;
+    padding: 16px 32px; border-radius: 5px;
+    text-decoration: none; letter-spacing: 0.01em;
+    transition: background 0.2s, transform 0.15s;
+    display: inline-block;
+  }
+  .btn-primary:hover { background: #9a7209; transform: translateY(-1px); }
+  .hero-guarantee {
+    font-size: 0.8rem; color: rgba(255,255,255,0.5);
+  }
+  .hero-score-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 28px 24px;
+    min-width: 200px;
+    text-align: center;
+  }
+  .score-label { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 8px; }
+  .score-num {
+    font-family: 'Fraunces', serif;
+    font-size: 4rem; font-weight: 900;
+    color: var(--gold-light); line-height: 1;
+  }
+  .score-denom { font-size: 1rem; color: rgba(255,255,255,0.35); }
+  .score-verdict { font-size: 0.78rem; color: rgba(255,255,255,0.6); margin-top: 10px; line-height: 1.4; }
+  .score-bars { margin-top: 18px; display: flex; flex-direction: column; gap: 7px; }
+  .bar-row { display: flex; align-items: center; gap: 8px; }
+  .bar-name { font-size: 0.62rem; color: rgba(255,255,255,0.4); width: 72px; text-align: right; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; }
+  .bar-fill { height: 100%; border-radius: 2px; background: var(--gold-light); }
 
----
+  /* ─── METHODOLOGY BAND ─── */
+  .method-band {
+    background: var(--gold-bg);
+    border-top: 2px solid var(--gold);
+    border-bottom: 1px solid #e8d89a;
+    padding: 28px 5%;
+    text-align: center;
+  }
+  .method-band p {
+    font-size: 0.85rem; color: #6b5700;
+    max-width: 700px; margin: 0 auto;
+    line-height: 1.6;
+  }
+  .method-band strong { color: var(--gold); }
 
-## 📦 What's in the Free Tier
+  /* ─── SECTIONS ─── */
+  .section { padding: 80px 5%; }
+  .section-inner { max-width: 900px; margin: 0 auto; }
+  .section-eyebrow {
+    font-size: 0.7rem; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--gold); margin-bottom: 14px;
+  }
+  .section h2 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: 700; letter-spacing: -0.02em;
+    line-height: 1.2; margin-bottom: 18px; color: var(--slate);
+  }
+  .section-lead {
+    font-size: 1.05rem; color: var(--mid);
+    max-width: 640px; line-height: 1.7; margin-bottom: 48px;
+  }
+  hr.rule { border: none; border-top: 1px solid var(--rule); margin: 0; }
 
-📋 Multi-framework scoring engine — one structured session across all 4 frameworks
-🔍 Scored gap register — primary evidence format for internal audit & regulators
-📄 Steering committee PDF export — board-ready, no reformatting needed
-⏱️ Completed in under 45 minutes
+  /* ─── AUTHOR ─── */
+  .author-block {
+    background: var(--accent-light);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 32px 36px;
+    display: grid; grid-template-columns: auto 1fr;
+    gap: 28px; align-items: start;
+  }
+  .author-avatar {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem; font-weight: 900; color: var(--white);
+    flex-shrink: 0;
+  }
+  .author-quote {
+    font-family: 'Fraunces', serif;
+    font-size: 1.1rem; font-style: italic;
+    color: var(--slate); line-height: 1.65;
+    margin-bottom: 14px;
+  }
+  .author-name { font-weight: 600; font-size: 0.88rem; color: var(--accent); }
+  .author-title { font-size: 0.82rem; color: var(--mid); margin-top: 2px; }
 
----
+  /* ─── DIMENSIONS ─── */
+  .dims-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .dim-card {
+    background: var(--white);
+    padding: 24px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .dim-card:hover { background: var(--bg); }
+  .dim-icon { font-size: 1.4rem; margin-bottom: 10px; }
+  .dim-title { font-weight: 600; font-size: 0.95rem; color: var(--slate); margin-bottom: 6px; }
+  .dim-risk {
+    font-size: 0.78rem; color: var(--mid);
+    line-height: 1.5;
+    display: none;
+  }
+  .dim-card.open .dim-risk { display: block; }
+  .dim-card.open { background: var(--accent-light); }
+  .dim-card.open .dim-title { color: var(--accent); }
+  .dim-toggle { font-size: 0.72rem; color: var(--muted); margin-top: 8px; }
 
-## 🔐 Governance Command Suite — $249
+  /* ─── WHAT YOU GET ─── */
+  .deliverables {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 48px;
+  }
+  .deliverable {
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 22px;
+  }
+  .del-icon { font-size: 1.5rem; margin-bottom: 10px; }
+  .del-title { font-weight: 600; font-size: 0.9rem; color: var(--slate); margin-bottom: 6px; }
+  .del-desc { font-size: 0.82rem; color: var(--mid); line-height: 1.55; }
 
-For organizations that need to close the gaps, not just find them.
+  /* ─── VALUE COMPARE ─── */
+  .compare-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+  .compare-table th {
+    text-align: left; padding: 12px 16px;
+    font-weight: 600; font-size: 0.72rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    border-bottom: 2px solid var(--rule);
+    color: var(--mid);
+  }
+  .compare-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--rule);
+    color: var(--mid);
+    vertical-align: top;
+  }
+  .compare-table td:first-child { color: var(--ink); font-weight: 500; }
+  .compare-table .col-ours { background: var(--gold-bg); color: #5a4200 !important; }
+  .compare-table .col-ours.top { font-weight: 700; color: var(--gold) !important; }
+  .check { color: #27ae60; }
+  .cross { color: #e74c3c; }
 
-✅ Automated gap-to-clause cross-mapping (NIST, ISO, OWASP, EU AI Act)
-✅ Remediation Task Register formatted for Jira & ServiceNow
-✅ 12-slide Steering Committee Briefing Pack — editable PowerPoint
-✅ Timestamped Audit Evidence Package for regulators & legal counsel
-✅ Continuous Monitoring Baseline with quarterly delta tracking
-✅ 30-minute governance specialist consultation
+  /* ─── WHO ─── */
+  .personas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+  }
+  .persona {
+    border: 1px solid var(--rule);
+    border-radius: 8px; padding: 22px;
+  }
+  .persona-role { font-weight: 600; font-size: 0.88rem; color: var(--accent); margin-bottom: 8px; }
+  .persona-pain { font-size: 0.82rem; color: var(--mid); line-height: 1.55; }
+  .persona-outcome { font-size: 0.8rem; color: var(--slate); font-weight: 500; margin-top: 10px; }
 
-🔗 [Upgrade to Command Suite](https://nextgengroup1.gumroad.com)
+  /* ─── FAQ ─── */
+  .faq-list { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+  .faq-item { border-bottom: 1px solid var(--rule); }
+  .faq-item:last-child { border-bottom: none; }
+  .faq-q {
+    width: 100%; background: none; border: none;
+    text-align: left; cursor: pointer;
+    padding: 20px 24px;
+    font-size: 0.92rem; font-weight: 600; color: var(--slate);
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 16px;
+  }
+  .faq-q:hover { background: var(--bg); }
+  .faq-chevron { flex-shrink: 0; transition: transform 0.2s; font-style: normal; color: var(--muted); }
+  .faq-item.open .faq-chevron { transform: rotate(180deg); }
+  .faq-a {
+    padding: 0 24px;
+    max-height: 0; overflow: hidden;
+    font-size: 0.87rem; color: var(--mid); line-height: 1.7;
+    transition: max-height 0.3s ease, padding 0.2s;
+  }
+  .faq-item.open .faq-a { max-height: 300px; padding-bottom: 20px; }
 
----
+  /* ─── CTA FOOTER ─── */
+  .cta-section {
+    background: var(--slate);
+    padding: 80px 5%;
+    text-align: center;
+    color: var(--white);
+  }
+  .cta-section h2 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-weight: 900; letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+  .cta-section p {
+    font-size: 1rem; color: rgba(255,255,255,0.65);
+    max-width: 500px; margin: 0 auto 36px;
+    line-height: 1.65;
+  }
+  .price-display {
+    display: inline-flex; align-items: baseline; gap: 6px;
+    margin-bottom: 28px;
+  }
+  .price-amount {
+    font-family: 'Fraunces', serif;
+    font-size: 3.5rem; font-weight: 900;
+    color: var(--gold-light); line-height: 1;
+  }
+  .price-vs {
+    font-size: 0.78rem; color: rgba(255,255,255,0.35);
+    text-decoration: line-through; margin-left: 8px;
+  }
+  .cta-sub {
+    font-size: 0.8rem; color: rgba(255,255,255,0.4);
+    margin-top: 16px;
+  }
 
-## 🎯 Built For
+  footer {
+    padding: 24px 5%;
+    border-top: 1px solid var(--rule);
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
 
-CIOs · CTOs · Enterprise Architects · AI Program Leads · Compliance Officers
+  @media (max-width: 640px) {
+    .hero-inner { grid-template-columns: 1fr; }
+    .hero-score-card { display: none; }
+    .author-block { grid-template-columns: 1fr; }
+    .author-avatar { display: none; }
+  }
+</style>
+</head>
+<body>
 
-**Global Enterprises in the US, UK, and EU**
+<!-- NAV -->
+<nav>
+  <span class="nav-brand">AI Readiness Scorecard</span>
+  <a href="https://nextgengroup1.gumroad.com/l/ai-modernization-scorecard-enterprise" target="_blank" class="nav-cta">Get Scorecard — $97</a>
+</nav>
 
-> *Learn from the best — without reinventing the wheel.*
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <p class="hero-eyebrow">Global Enterprise AI Readiness · US · UK · EU · Worldwide · 8 Dimensions · 40+ Criteria</p>
+      <h1>Most AI initiatives fail<br>before they start.<br><em>Know your gaps first.</em></h1>
+      <p class="hero-sub">
+        A rigorous, methodology-backed scorecard built by a transformation executive.
+        Assess your enterprise across 8 critical dimensions in 5 minutes—and know exactly where to act.
+      </p>
+      <div class="hero-actions">
+        <a href="https://nextgengroup1.gumroad.com/l/ai-modernization-scorecard-enterprise" target="_blank" class="btn-primary">Get Your Scorecard — $97</a>
+        <span class="hero-guarantee">30-day money-back guarantee</span>
+      </div>
+    </div>
+    <div class="hero-score-card" aria-hidden="true">
+      <div class="score-label">Sample Score</div>
+      <div><span class="score-num">62</span><span class="score-denom">/100</span></div>
+      <div class="score-verdict">Strong data infra · Critical gaps in change management</div>
+      <div class="score-bars">
+        <div class="bar-row"><span class="bar-name">Data</span><div class="bar-track"><div class="bar-fill" style="width:84%"></div></div></div>
+        <div class="bar-row"><span class="bar-name">Strategy</span><div class="bar-track"><div class="bar-fill" style="width:70%"></div></div></div>
+        <div class="bar-row"><span class="bar-name">Talent</span><div class="bar-track"><div class="bar-fill" style="width:55%"></div></div></div>
+        <div class="bar-row"><span class="bar-name">Ops Model</span><div class="bar-track"><div class="bar-fill" style="width:42%"></div></div></div>
+        <div class="bar-row"><span class="bar-name">Change Mgmt</span><div class="bar-track"><div class="bar-fill" style="width:30%"></div></div></div>
+        <div class="bar-row"><span class="bar-name">Governance</span><div class="bar-track"><div class="bar-fill" style="width:58%"></div></div></div>
+        <div class="bar-row"><span class="bar-name">Tech Stack</span><div class="bar-track"><div class="bar-fill" style="width:76%"></div></div></div>
+        <div class="bar-row"><span class="bar-name">Culture</span><div class="bar-track"><div class="bar-fill" style="width:48%"></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- METHODOLOGY BAND -->
+<div class="method-band">
+  <p>
+    This scorecard synthesizes assessment frameworks from <strong>McKinsey, Deloitte, and BCG</strong>—
+    combined with real-world insight from 100+ enterprise transformation engagements.
+    Not a generic checklist. A practitioner's diagnostic.
+  </p>
+</div>
+
+<hr class="rule">
+
+<!-- AUTHOR -->
+<section class="section" style="padding-bottom: 0;">
+  <div class="section-inner">
+    <p class="section-eyebrow">Who Built This</p>
+    <div class="author-block">
+      <div class="author-avatar">NG</div>
+      <div>
+        <p class="author-quote">
+          "I've watched enterprises spend $5M on AI pilots that collapse because
+          nobody mapped the real gaps before signing the contract.
+          This scorecard is what I use with clients—distilled into a format any transformation leader
+          can run themselves in under 5 minutes."
+        </p>
+        <div class="author-name">Senior Transformation Executive</div>
+        <div class="author-title">20+ years leading enterprise modernization across Fortune 500 and global corporations in the US, UK, and EU</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule" style="margin-top: 80px;">
+
+<!-- 8 DIMENSIONS -->
+<section class="section">
+  <div class="section-inner">
+    <p class="section-eyebrow">What You're Assessing</p>
+    <h2>8 dimensions. Every real failure mode covered.</h2>
+    <p class="section-lead">Click any dimension to see the failure risk it surfaces—and why it matters before you spend a dollar on AI.</p>
+    <div class="dims-grid" id="dims">
+      <div class="dim-card" onclick="toggleDim(this)">
+        <div class="dim-icon">🗄️</div>
+        <div class="dim-title">Data &amp; Infrastructure</div>
+        <div class="dim-risk">Can your systems actually feed an AI initiative? Poor data quality and fragmented infrastructure is the #1 silent killer of AI projects—usually discovered six months in.</div>
+        <div class="dim-toggle">↓ See the risk</div>
+      </div>
+      <div class="dim-card" onclick="toggleDim(this)">
+        <div class="dim-icon">🎯</div>
+        <div class="dim-title">Strategy &amp; Vision</div>
+        <div class="dim-risk">Do your leadership teams share the same definition of what AI success looks like? Misalignment at the top creates budget battles, scope drift, and initiative death-by-committee.</div>
+        <div class="dim-toggle">↓ See the risk</div>
+      </div>
+      <div class="dim-card" onclick="toggleDim(this)">
+        <div class="dim-icon">👥</div>
+        <div class="dim-title">Talent &amp; Skills</div>
+        <div class="dim-risk">You can't hire your way out of a capability gap mid-program. This dimension scores whether you have the right skills in-house—or a realistic plan to acquire them before they become blockers.</div>
+        <div class="dim-toggle">↓ See the risk</div>
+      </div>
+      <div class="dim-card" onclick="toggleDim(this)">
+        <div class="dim-icon">⚙️</div>
+        <div class="dim-title">Operating Model</div>
+        <div class="dim-risk">Most org structures were designed before AI existed. This dimension reveals whether your decision rights, team structures, and workflows can actually absorb AI-driven change—or resist it.</div>
+        <div class="dim-toggle">↓ See the risk</div>
+      </div>
+      <div class="dim-card" onclick="toggleDim(this)">
+        <div class="dim-icon">🔄</div>
+        <div class="dim-title">Change Management</div>
+        <div class="dim-risk">Technology is rarely why AI fails. People resistance, unclear adoption plans, and inadequate training are. This is typically the lowest-scoring dimension for large enterprises—and the highest-risk.</div>
+        <div class="dim-toggle">↓ See the risk</div>
+      </div>
+      <div class="dim-card" onclick="toggleDim(this)">
+        <div class="dim-icon">🛡️</div>
+        <div class="dim-title">Governance &amp; Risk</div>
+        <div class="dim-risk">Boards and regulators are asking harder AI questions than most teams can answer. Gaps in governance don't pause AI—they surface at the worst possible moment: a breach, a bias incident, an audit.</div>
+        <div class="dim-toggle">↓ See the risk</div>
+      </div>
+      <div class="dim-card" onclick="toggleDim(this)">
+        <div class="dim-icon">🔧</div>
+        <div class="dim-title">Technology Stack</div>
+        <div class="dim-risk">Legacy systems, integration debt, and vendor lock-in can quietly cap how much AI you can actually deploy—regardless of budget. Knowing your constraints upfront saves months of backtracking.</div>
+        <div class="dim-toggle">↓ See the risk</div>
+      </div>
+      <div class="dim-card" onclick="toggleDim(this)">
+        <div class="dim-icon">🌱</div>
+        <div class="dim-title">Culture &amp; Leadership</div>
+        <div class="dim-risk">AI transformation is a leadership challenge disguised as a technology challenge. This dimension scores executive sponsorship quality, psychological safety, and experimentation culture—the real enablers.</div>
+        <div class="dim-toggle">↓ See the risk</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- WHAT YOU GET -->
+<section class="section" style="background: var(--bg);">
+  <div class="section-inner">
+    <p class="section-eyebrow">What's Included</p>
+    <h2>Everything you need to assess, present, and act.</h2>
+    <p class="section-lead">Seven practitioner-grade tools—designed to surface real gaps and move budget conversations forward.</p>
+    <div class="deliverables">
+      <div class="deliverable">
+        <div class="del-icon">📋</div>
+        <div class="del-title">Diagnostic Workbook</div>
+        <div class="del-desc">40+ assessment questions designed to surface what leaders won't say in meetings. Score your organization on every dimension with guided criteria.</div>
+      </div>
+      <div class="deliverable">
+        <div class="del-icon">📊</div>
+        <div class="del-title">Executive Scorecard</div>
+        <div class="del-desc">One-page visual showing all 8 dimension scores, overall readiness grade, and your critical path to improvement. Board-ready format.</div>
+      </div>
+      <div class="deliverable">
+        <div class="del-icon">🗺️</div>
+        <div class="del-title">90-Day Quick Wins Roadmap</div>
+        <div class="del-desc">3–5 high-impact moves you can start this quarter—chosen to build momentum and make your next budget conversation easier.</div>
+      </div>
+      <div class="deliverable">
+        <div class="del-icon">🎨</div>
+        <div class="del-title">Leadership Presentation Deck</div>
+        <div class="del-desc">Present your findings to executives without sounding like you're admitting failure. Pre-built narrative that turns a gap analysis into a strategic plan.</div>
+      </div>
+      <div class="deliverable">
+        <div class="del-icon">📈</div>
+        <div class="del-title">Industry Benchmark Data</div>
+        <div class="del-desc">See how your scores compare to 100+ enterprises. Contextualize gaps as industry-common or enterprise-specific—critical for board conversations.</div>
+      </div>
+      <div class="deliverable">
+        <div class="del-icon">💡</div>
+        <div class="del-title">Stakeholder Interview Guide</div>
+        <div class="del-desc">Structured questions for CTO, CHRO, CDO, and line-of-business leaders. Dig deeper where the workbook surfaces a flag.</div>
+      </div>
+      <div class="deliverable">
+        <div class="del-icon">📄</div>
+        <div class="del-title">Full Methodology Guide</div>
+        <div class="del-desc">The complete rationale behind every dimension and scoring criterion. Transparency matters—especially when presenting to skeptical stakeholders.</div>
+      </div>
+    </div>
+    <p style="font-size: 0.82rem; color: var(--muted);">✓ Includes free updates as AI capabilities and enterprise standards evolve. Yours forever.</p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- VALUE COMPARE -->
+<section class="section">
+  <div class="section-inner">
+    <p class="section-eyebrow">Why $97</p>
+    <h2>The same diagnostic lens. A fraction of the cost.</h2>
+    <p class="section-lead">This scorecard synthesizes the same frameworks top consultancies use—without the six-figure engagement fee or the six-month timeline.</p>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Consulting Engagement</th>
+          <th class="col-ours">This Scorecard</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Cost</td>
+          <td>$15,000–$50,000+</td>
+          <td class="col-ours top">$97</td>
+        </tr>
+        <tr>
+          <td>Time to insight</td>
+          <td>8–16 weeks</td>
+          <td class="col-ours">5 minutes</td>
+        </tr>
+        <tr>
+          <td>Methodology depth</td>
+          <td><span class="check">✓</span> McKinsey / BCG / Deloitte</td>
+          <td class="col-ours"><span class="check">✓</span> Same frameworks, synthesized</td>
+        </tr>
+        <tr>
+          <td>Honest about your gaps</td>
+          <td>Sometimes (they want the next engagement)</td>
+          <td class="col-ours"><span class="check">✓</span> Always</td>
+        </tr>
+        <tr>
+          <td>Executive presentation ready</td>
+          <td><span class="check">✓</span></td>
+          <td class="col-ours"><span class="check">✓</span> Deck included</td>
+        </tr>
+        <tr>
+          <td>You own it</td>
+          <td><span class="cross">✗</span> They own the IP</td>
+          <td class="col-ours"><span class="check">✓</span> Forever, with updates</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- WHO IT'S FOR -->
+<section class="section" style="background: var(--bg);">
+  <div class="section-inner">
+    <p class="section-eyebrow">Who It's For</p>
+    <h2>Built for the people who have to make AI work.</h2>
+    <p class="section-lead">Built for transformation leaders at large enterprises across the US, UK, EU, and global markets. Not for AI researchers. Not tailored for Canadian organizations.</p>
+    <div class="personas">
+      <div class="persona">
+        <div class="persona-role">CTO / VP Technology</div>
+        <div class="persona-pain">Under pressure to show an AI roadmap, but not sure if the infrastructure or operating model can actually support it.</div>
+        <div class="persona-outcome">→ Get an honest infrastructure score and a defensible prioritization framework before you commit.</div>
+      </div>
+      <div class="persona">
+        <div class="persona-role">Chief Digital Officer</div>
+        <div class="persona-pain">Driving digital transformation but struggling to align the business on AI investment priorities and sequencing.</div>
+        <div class="persona-outcome">→ Use benchmark data and the executive scorecard to align leadership in a single meeting.</div>
+      </div>
+      <div class="persona">
+        <div class="persona-role">Head of Transformation</div>
+        <div class="persona-pain">Launching an AI program without a shared understanding of organizational readiness across functions.</div>
+        <div class="persona-outcome">→ Run the assessment across teams, surface the real blockers, and build a roadmap that sticks.</div>
+      </div>
+      <div class="persona">
+        <div class="persona-role">Strategy / Operations Lead</div>
+        <div class="persona-pain">Building the business case for AI investment but lacking a credible framework to justify scope and sequencing.</div>
+        <div class="persona-outcome">→ Turn the scorecard output directly into a board-ready business case.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- FAQ -->
+<section class="section">
+  <div class="section-inner">
+    <p class="section-eyebrow">Common Questions</p>
+    <h2>What people ask before buying.</h2>
+    <div class="faq-list" style="margin-top: 32px;">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">What if our score comes back terrible? <span class="faq-chevron">▾</span></button>
+        <div class="faq-a">That's the point. Most enterprises score lower than expected on change management and governance—and higher than expected on data infrastructure. A low score isn't a failure report. It's a map of exactly where to focus, before those gaps cost millions to fix mid-program.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">How is this different from McKinsey or Deloitte doing an assessment? <span class="faq-chevron">▾</span></button>
+        <div class="faq-a">It synthesizes the same methodology—built by someone who's led the same type of engagements. The difference: you run it yourself in 30 minutes for $97, you own all the output, and you don't end up with a consultant recommending their next $200K engagement as the solution.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Will this help me get budget approved for an AI initiative? <span class="faq-chevron">▾</span></button>
+        <div class="faq-a">That's one of the primary design goals. The executive scorecard, benchmark data, and leadership presentation deck are all built to translate your assessment into a compelling, credible business case. Boards respond to structured gap analysis backed by industry benchmarks.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">What industries does this cover? <span class="faq-chevron">▾</span></button>
+        <div class="faq-a">The 8-dimension framework applies across industries—financial services, healthcare, manufacturing, retail, and public sector—and is designed for large enterprises operating in the US, UK, EU, and international markets globally. It is not tailored for the Canadian regulatory or market context.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">How long does it take to complete? <span class="faq-chevron">▾</span></button>
+        <div class="faq-a">The self-assessment takes 5–10 minutes to complete solo. If you use the stakeholder interview guide to validate scores with your team, plan for 30–60 minutes of total time. Either way, you'll have a full scored output before your next meeting.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">What format are the files? <span class="faq-chevron">▾</span></button>
+        <div class="faq-a">You'll receive an Excel workbook (the diagnostic and scoring engine), a PDF assessment guide, a PowerPoint presentation deck, a PDF executive scorecard, and supplementary PDFs for the roadmap, benchmark data, and interview guide. Everything is editable and brandable.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="get">
+  <h2>Stop guessing.<br>Know your score.</h2>
+  <p>A 5-minute diagnostic that changes how you think about your AI roadmap—and how you sell it to leadership.</p>
+  <div class="price-display">
+    <span class="price-amount">$97</span>
+    <span class="price-vs">vs. $15K+ consultant</span>
+  </div>
+  <br>
+  <a href="https://nextgengroup1.gumroad.com/l/ai-modernization-scorecard-enterprise" target="_blank" class="btn-primary" style="font-size: 1.05rem; padding: 18px 40px;">Get the Scorecard Now</a>
+  <p class="cta-sub">Instant download · All 7 files · Free updates forever · 30-day money-back guarantee</p>
+</section>
+
+<footer>
+  <p>© 2025 NextGen Group. Enterprise AI Readiness Scorecard.</p>
+</footer>
+
+<script>
+  function toggleDim(el) {
+    const wasOpen = el.classList.contains('open');
+    document.querySelectorAll('.dim-card').forEach(c => {
+      c.classList.remove('open');
+      c.querySelector('.dim-toggle').textContent = '↓ See the risk';
+    });
+    if (!wasOpen) {
+      el.classList.add('open');
+      el.querySelector('.dim-toggle').textContent = '↑ Close';
+    }
+  }
+
+  function toggleFaq(btn) {
+    const item = btn.closest('.faq-item');
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
+  }
+</script>
+</body>
+</html>
